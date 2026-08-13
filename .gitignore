@@ -19,13 +19,23 @@
 .DS_Store
 *.pem
 
+# editores
+.idea/
+.vscode/
+.claude/
+
+# artefactos de scripts/audit-pages.mjs
+/scripts/screenshots/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel

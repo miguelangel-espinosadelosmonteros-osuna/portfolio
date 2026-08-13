@@ -67,10 +67,12 @@ export default function Home() {
       }
     };
 
-    window?.addEventListener('scroll', handleScroll);
+    // passive: el navegador no tiene que esperar a saber si haremos
+    // preventDefault, así el scroll no se bloquea en el hilo principal.
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      window?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -92,7 +94,8 @@ export default function Home() {
           >
             <p>Scroll</p>
 
-            <ArrowDownRight strokeWidth={3} className="size-6" />
+            {/* `size-6` requiere Tailwind 3.4; aquí hay 3.3.3. */}
+            <ArrowDownRight strokeWidth={3} className="h-6 w-6" />
           </div>
         </Magnetic>
       )}

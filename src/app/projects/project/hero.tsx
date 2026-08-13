@@ -37,7 +37,9 @@ export default function ProjectHero({
       className={clsx(
         'relative',
         isImage ? 'h-[60vh] lg:h-screen' : 'h-screen',
-        bgColour ? `bg-${bgColour}` : 'bg-black'
+        // Clase completa, no interpolada: Tailwind purga `bg-${bgColour}`
+        // porque no puede verla en el código al compilar.
+        bgColour ?? 'bg-black'
       )}
     >
       {isImage ? (
@@ -57,7 +59,7 @@ export default function ProjectHero({
           className="aspect-video h-full w-full"
           allow="accelerometer; autoplay; modestbranding; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-          frameBorder="0"
+          style={{ border: 0 }}
           loading="lazy"
         ></iframe>
       )}
@@ -66,7 +68,9 @@ export default function ProjectHero({
       )}
       {!isImage && (
         <Button
-          className="absolute bottom-32 right-6 z-10 h-8 rounded px-3 sm:bottom-16"
+          // En móvil `bottom-32` caía justo encima del título; se sube al
+          // hueco libre bajo la cabecera y solo baja a partir de sm.
+          className="absolute right-4 top-20 z-10 h-8 rounded px-3 sm:bottom-16 sm:right-6 sm:top-auto"
           onClick={toggleMute}
         >
           {isMuted ? 'Unmute' : 'Mute'}
@@ -74,8 +78,10 @@ export default function ProjectHero({
       )}
       <div
         className={clsx(
-          'absolute left-12 flex w-full',
-          isImage ? 'bottom-12' : 'bottom-4 left-12 sm:bottom-16'
+          // `left-12 w-full` hacía el bloque 3rem más ancho que el viewport;
+          // con inset-x el texto queda dentro en cualquier pantalla.
+          'absolute flex inset-x-6 sm:inset-x-12',
+          isImage ? 'bottom-12' : 'bottom-4 sm:bottom-16'
         )}
       >
         <div className="flex max-w-xs flex-col gap-4 sm:max-w-4xl sm:gap-6">

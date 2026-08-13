@@ -6,14 +6,21 @@ export interface SpotifyTrack {
   name: string;
   artist: string;
   album: string;
-  albumArt: string;
+  albumArt: string | null;
   url: string;
 }
+
+export interface SpotifyArtist {
+  name: string;
+  url: string;
+  images: Array<{ url: string; height: number | null; width: number | null }>;
+}
+
 export interface SpotifyPlaylist {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  imageUrl: string | null;
   trackCount: number;
   firstTrack: string;
   firstTrackArtist: string;
@@ -22,49 +29,49 @@ export interface SpotifyPlaylist {
 
 export const useSpotify = () => {
   const [topTracks, setTopTracks] = useState<SpotifyTrack[]>([]);
-  const [topArtists, setTopArtists] = useState<SpotifyTrack[]>([]);
+  const [topArtists, setTopArtists] = useState<SpotifyArtist[]>([]);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
+  // Un contador por petición: antes ambos fetches compartían un único
+  // `isLoading` y el primero en terminar apagaba el spinner del otro.
+  const [pending, setPending] = useState(2);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSpotifyPlaylists = async () => {
-      setIsLoading(true);
+    const controller = new AbortController();
+    let active = true;
+
+    const load = async <T,>(url: string, apply: (data: T) => void) => {
       try {
-        const response = await fetch('/api/spotify-playlists');
+        const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) {
-          throw new Error('Failed to fetch Spotify playlists');
+          const body = await response.json().catch(() => null);
+          throw new Error(body?.error ?? `La petición a ${url} falló`);
         }
-        const data = await response.json();
-        setPlaylists(data);
+        const data = (await response.json()) as T;
+        if (active) apply(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        if (!active || controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : 'Ocurrió un error');
       } finally {
-        setIsLoading(false);
+        if (active) setPending((count) => count - 1);
       }
     };
 
-    const fetchTopTracks = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch('/api/spotify-top-tracks');
-        if (!response.ok) {
-          throw new Error('Failed to fetch top tracks');
-        }
-        const data = await response.json();
-        setTopTracks(data.topTracks);
-        setTopArtists(data.topArtists);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
+    load<SpotifyPlaylist[]>('/api/spotify-playlists', setPlaylists);
+    load<{ topTracks: SpotifyTrack[]; topArtists: SpotifyArtist[] }>(
+      '/api/spotify-top-tracks',
+      (data) => {
+        setTopTracks(data.topTracks ?? []);
+        setTopArtists(data.topArtists ?? []);
       }
-    };
+    );
 
-    fetchTopTracks();
-    fetchSpotifyPlaylists();
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, []);
 
-  return { topTracks, topArtists, isLoading, error, playlists };
+  return { topTracks, topArtists, playlists, isLoading: pending > 0, error };
 };

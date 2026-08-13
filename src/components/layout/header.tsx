@@ -45,7 +45,7 @@ export default function Header() {
     <>
       <div
         ref={header}
-        className="absolute top-0 z-20 box-border flex w-full items-center justify-between p-4 font-light text-white mix-blend-difference lg:p-8"
+        className="absolute top-0 z-20 box-border flex w-full items-center justify-between gap-2 p-4 font-light text-white mix-blend-difference lg:p-8"
       >
         <div className="flex">
           {/* Mobile and Tablet Logo */}
@@ -60,7 +60,9 @@ export default function Header() {
                 style={{ objectFit: 'cover' }}
               />
             </Magnetic>
-            <div className="flex items-center space-x-2">
+            {/* En pantallas muy estrechas el logo basta: el wordmark
+                empujaba el menú fuera del viewport. */}
+            <div className="hidden items-center space-x-2 xs:flex">
                 <div className="hover:rotate-[360deg]">©</div>
                 <div className="text-base sm:text-lg">
                     Mike

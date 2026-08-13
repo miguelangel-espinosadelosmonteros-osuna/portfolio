@@ -127,6 +127,6 @@
   animation: infinite-scroll 40s linear infinite;
 }
 
-.hover\\:pause:hover {
+.hover\:pause:hover {
   animation-play-state: paused;
 }

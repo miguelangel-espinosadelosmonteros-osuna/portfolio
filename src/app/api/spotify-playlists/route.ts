@@ -1,79 +1,60 @@
 import { NextResponse } from 'next/server';
-import SpotifyWebApi from 'spotify-web-api-node';
+import { spotifyFetch, toPublicError } from '@/lib/spotify';
 
-const spotifyApi = new SpotifyWebApi({
-  clientId: process.env.SPOTIFY_CLIENT_ID,
-  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: process.env.SPOTIFY_REDIRECT_URI,
-  refreshToken: process.env.SPOTIFY_REFRESH_TOKEN
-});
+export const dynamic = 'force-dynamic';
 
-// ID de tu playlist principal
-const MAIN_PLAYLIST_ID = '2lk45v8v1wBksvfiqZzC8x';
+const DEFAULT_PLAYLIST_ID = '2lk45v8v1wBksvfiqZzC8x';
+
+type PlaylistResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  images: Array<{ url: string }> | null;
+  tracks: { total: number };
+  external_urls: { spotify: string };
+  public: boolean | null;
+  owner: { display_name?: string | null };
+};
+
+type TracksResponse = {
+  items: Array<{
+    track: {
+      name: string;
+      artists: Array<{ name: string }>;
+    } | null;
+  }>;
+};
 
 export async function GET() {
+  const playlistId = process.env.SPOTIFY_PLAYLIST_ID || DEFAULT_PLAYLIST_ID;
+
   try {
-    // Refresh the access token
-    const data = await spotifyApi.refreshAccessToken();
-    spotifyApi.setAccessToken(data.body['access_token']);
+    const [playlist, tracks] = await Promise.all([
+      spotifyFetch<PlaylistResponse>(`/playlists/${playlistId}`),
+      spotifyFetch<TracksResponse>(`/playlists/${playlistId}/tracks`, {
+        limit: 1
+      })
+    ]);
 
-    // Verificar que tenemos los tokens necesarios
-    if (!process.env.SPOTIFY_REFRESH_TOKEN) {
-      throw new Error('Missing SPOTIFY_REFRESH_TOKEN');
-    }
+    const firstTrack = tracks.items[0]?.track;
 
-    // Intentar obtener la playlist
-    console.log('Fetching playlist:', MAIN_PLAYLIST_ID);
-    const playlist = await spotifyApi.getPlaylist(MAIN_PLAYLIST_ID);
-    
-    // Verificar que la playlist existe
-    if (!playlist.body) {
-      throw new Error('Playlist not found');
-    }
-
-    console.log('Playlist found:', playlist.body.name);
-    console.log('Is public:', playlist.body.public);
-    console.log('Owner:', playlist.body.owner.display_name);
-
-    // Obtener las canciones
-    const tracks = await spotifyApi.getPlaylistTracks(MAIN_PLAYLIST_ID, {
-      limit: 1
-    });
-
-    const playlistData = {
-      id: playlist.body.id,
-      name: playlist.body.name,
-      description: playlist.body.description,
-      imageUrl: playlist.body.images[0]?.url,
-      trackCount: playlist.body.tracks.total,
-      firstTrack: tracks.body.items[0]?.track?.name || 'No tracks',
-      firstTrackArtist: tracks.body.items[0]?.track?.artists[0].name || 'Unknown artist',
-      url: playlist.body.external_urls.spotify,
-      isPublic: playlist.body.public,
-      owner: playlist.body.owner.display_name
-    };
-
-    // Devolver la playlist como un array de un elemento para mantener la compatibilidad
-    return NextResponse.json([playlistData]);
-  } catch (error: any) {
-    console.error('Error fetching Spotify playlist:', error?.body || error);
-    
-    // Intentar obtener información más detallada del error
-    const errorDetails = {
-      message: error?.body?.error?.message || error.message,
-      status: error?.body?.error?.status || 500,
-      reason: error?.body?.error?.reason || 'Unknown error',
-      stack: error.stack
-    };
-
-    console.error('Error details:', errorDetails);
-
-    return NextResponse.json(
-      { 
-        error: 'Failed to fetch Spotify playlist', 
-        details: errorDetails
-      },
-      { status: errorDetails.status }
-    );
+    return NextResponse.json([
+      {
+        id: playlist.id,
+        name: playlist.name,
+        description: playlist.description ?? '',
+        imageUrl: playlist.images?.[0]?.url ?? null,
+        trackCount: playlist.tracks.total,
+        firstTrack: firstTrack?.name ?? 'Sin canciones',
+        firstTrackArtist: firstTrack?.artists?.[0]?.name ?? 'Artista desconocido',
+        url: playlist.external_urls.spotify,
+        isPublic: playlist.public ?? false,
+        owner: playlist.owner.display_name ?? ''
+      }
+    ]);
+  } catch (error) {
+    const { message, status } = toPublicError(error);
+    console.error('[spotify-playlists]', error);
+    return NextResponse.json({ error: message }, { status });
   }
 }

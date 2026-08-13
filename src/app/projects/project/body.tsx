@@ -29,10 +29,10 @@ export default function ProjectBody({
           {subtitle}
         </h2>
         <div className="space-y-12">
-          <p className="text-primary-950/70 dark:text-primary-200/70 text-base sm:text-lg">
+          <p className="text-foreground/70 text-base sm:text-lg">
             {introduction}
           </p>
-          <p className="text-primary-950/70 dark:text-primary-200/70 text-base sm:text-lg">
+          <p className="text-foreground/70 text-base sm:text-lg">
             {myRole}
           </p>
         </div>
@@ -44,7 +44,7 @@ export default function ProjectBody({
               <h3 className="text-xl font-medium tracking-tight">
                 {paragraph.title}
               </h3>
-              <p className="text-primary-950/70 dark:text-primary-200/70 text-base sm:text-lg">
+              <p className="text-foreground/70 text-base sm:text-lg">
                 {paragraph.text}
               </p>
             </div>

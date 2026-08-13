@@ -29,7 +29,8 @@ export function ProjectCarousel({ images }: { images: string[] }) {
                     alt="project image"
                     src={image}
                     fill
-                    objectFit="cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
                   />
                 </CardContent>
               </Card>

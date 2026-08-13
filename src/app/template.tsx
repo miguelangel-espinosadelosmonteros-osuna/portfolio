@@ -36,14 +36,13 @@ export default function RootTemplate({ children }: PropsWithChildren) {
   }
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsLoading(false);
       document.body.style.cursor = 'default';
       window.scrollTo(0, 0);
     }, 800);
-    console.log('loading', isLoading);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -56,7 +55,9 @@ export default function RootTemplate({ children }: PropsWithChildren) {
         <motion.div style={{ height }} className="relative">
           <div
             className={clsx(
-              'absolute left-[-10%] z-10 h-[1050%] w-[120%] rounded-b-[100%] shadow-[0_60px_50px_0px_rgba(0,0,0,0.748)]',
+              // will-change promueve la capa para que la sombra se rasterice
+              // una vez en lugar de repintarse en cada frame del scroll.
+              'absolute left-[-10%] z-10 h-[1050%] w-[120%] rounded-b-[100%] shadow-[0_60px_50px_0px_rgba(0,0,0,0.748)] will-change-transform',
               semicircleColor
             )}
           ></div>

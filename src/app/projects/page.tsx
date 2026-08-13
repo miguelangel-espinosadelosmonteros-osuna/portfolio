@@ -37,7 +37,7 @@ const projects = [
     description:
       'Reusable packaging made of highly recyclable materials for baby bathing products.',
     src: 'GlucoMind/GlucoMind1.png',
-    href: 'https://github.com/mikesspinosa/diabetes-app',
+    href: 'https://github.com/miguelangel-espinosadelosmonteros-osuna/diabetes-app',
     tag: 'App para Diabetes',
     color: '#1a6ad8',
     wip: true

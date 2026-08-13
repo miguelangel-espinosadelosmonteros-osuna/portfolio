@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 const contact = [
     {
         icon: <FaGithub />,
-        link: 'https://github.com/mikesspinosa',
+        link: 'https://github.com/miguelangel-espinosadelosmonteros-osuna',
         ariaLabel: 'GitHub de Mike Espinosa'
     },
     {
@@ -234,20 +234,23 @@ export default function ContactInfo() {
                 <Tooltip>
                   <TooltipTrigger>
                     <Link
-                      href="https://github.com/mikesspinosa"
+                      href="https://github.com/miguelangel-espinosadelosmonteros-osuna"
                       className="flex items-center gap-1 group transition-all duration-300"
                     >
                       <FaGithub size={20} className="sm:w-6 sm:h-6 text-white group-hover:text-[#6e7681] transition-colors duration-300" />
                       <div className="flex items-center">
                         <span className="mr-1 sm:mr-2 text-sm sm:text-base transition-colors duration-300 group-hover:text-[#6e7681]">GitHub</span>
-                        <span className="text-[#6e7681] opacity-0 transition-opacity duration-300 group-hover:opacity-100 text-sm sm:text-base">
-                          @mikesspinosa
+                        {/* El handle real son 40 caracteres y desplazaba la
+                            fila al revelarse; aquí va el nombre y el handle
+                            completo queda en el tooltip. */}
+                        <span className="whitespace-nowrap text-[#6e7681] opacity-0 transition-opacity duration-300 group-hover:opacity-100 text-sm sm:text-base">
+                          Miguel Ángel Espinosa
                         </span>
                       </div>
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>GitHub: @mikesspinosa</p>
+                    <p>github.com/miguelangel-espinosadelosmonteros-osuna</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

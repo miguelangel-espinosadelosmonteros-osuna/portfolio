@@ -66,14 +66,18 @@ export default function TextParallax() {
       content: container.current.firstElementChild
     });
 
-    function raf(time: number) {
+    // El id del frame hay que guardarlo: sin cancelarlo, el bucle sobrevive al
+    // desmontaje llamando a un Lenis ya destruido y se acumula otro en cada
+    // navegación.
+    let frame = 0;
+    const raf = (time: number) => {
       lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
+      frame = requestAnimationFrame(raf);
+    };
+    frame = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(frame);
       lenis.destroy();
     };
   }, []);

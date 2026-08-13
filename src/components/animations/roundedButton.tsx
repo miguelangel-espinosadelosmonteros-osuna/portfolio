@@ -1,11 +1,10 @@
-import React, { PropsWithChildren, useRef } from 'react';
+import React, { PropsWithChildren } from 'react';
 import Magnetic from '@/components/animations/magnetic';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui/button';
 
-interface Props {
+interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   backgroundColor?: string;
-  className?: string;
 }
 
 export default function RoundedButton({

@@ -43,7 +43,7 @@ Para ejecutar este proyecto en tu entorno local, sigue estos pasos:
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/mikesspinosa/portfolio.git
+git clone https://github.com/miguelangel-espinosadelosmonteros-osuna/portfolio.git
 cd portfolio
 ```
 

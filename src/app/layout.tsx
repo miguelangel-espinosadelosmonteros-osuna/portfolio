@@ -21,19 +21,17 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <SpeedInsights />
-      <body className="overflow-scroll overflow-x-hidden">
+    <html lang="es">
+      <body className="overflow-x-hidden">
         <Animations>
-          <main>
-            <Header />
-            <div className="flex flex-col bg-background text-foreground">
-              <main className={`flex-grow ${inter.className}`}>{children}</main>
-              <Analytics />
-            </div>
-            <Toaster />
-          </main>
+          <Header />
+          <div className="flex flex-col bg-background text-foreground">
+            <main className={`flex-grow ${inter.className}`}>{children}</main>
+          </div>
+          <Toaster />
         </Animations>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

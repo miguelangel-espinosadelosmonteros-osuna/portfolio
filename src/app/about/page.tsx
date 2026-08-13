@@ -6,22 +6,34 @@ import { gsap } from 'gsap';
 import { useSpotify } from '@/hooks/useSpotify';
 import Layout from '@/components/layout';
 import SpotifyPlaylists from '@/app/about/spotifyPlaylists';
-import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+// Posiciones deterministas: con Math.random() el HTML del servidor y el del
+// cliente difieren y React tira un error de hidratación en cada carga.
+const STAR_POSITIONS = (() => {
+  let seed = 0x2f6e2b1;
+  const next = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  return Array.from({ length: 50 }, () => ({
+    top: `${(next() * 100).toFixed(3)}%`,
+    left: `${(next() * 100).toFixed(3)}%`
+  }));
+})();
 
 export default function About() {
   const starsRef = useRef<HTMLDivElement>(null);
-  const {
-    playlists,
-    isLoading: spotifyLoading,
-    error: spotifyError,
-    topTracks
-  } = useSpotify();
+  const { playlists, isLoading: spotifyLoading } = useSpotify();
   const isMobile = useMediaQuery('(max-width: 1024px)');
 
   useEffect(() => {
     if (!starsRef.current) return;
-    gsap.to(starsRef.current?.children, {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const tween = gsap.to(starsRef.current.children, {
       y: 'random(-20, 20)',
       x: 'random(-20, 20)',
       rotation: 'random(-360, 360)',
@@ -31,6 +43,11 @@ export default function About() {
       yoyo: true,
       stagger: 0.1
     });
+
+    // 50 tweens infinitos seguían corriendo tras salir de la página.
+    return () => {
+      tween.kill();
+    };
   }, []);
 
   useEffect(() => {
@@ -110,14 +127,11 @@ export default function About() {
       <Layout title="I'm Mike" center>
         <div className="relative min-h-screen">
           <div ref={starsRef}>
-            {[...Array(50)].map((_, i) => (
+            {STAR_POSITIONS.map((position, i) => (
               <div
                 key={i}
                 className="absolute h-1 w-1 rounded-full bg-white opacity-70"
-                style={{
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`
-                }}
+                style={position}
               />
             ))}
           </div>
@@ -141,8 +155,8 @@ export default function About() {
 
               {/* Text */}
               <div className="flex w-full max-w-3xl flex-col items-center text-center lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:max-w-none lg:items-start lg:text-left">
-                <div className="text-primary-950/70 dark:text-primary-200/70 space-y-8">
-                  <p className="text-2xl font-semibold rainbow-text">
+                <div className="text-foreground/70 space-y-8">
+                  <p className="gradient-heading text-2xl font-semibold">
                     Ingeniero en Tecnologías de la Información y Negocios Digitales con pasión por la innovación y la tecnología de vanguardia.
                   </p>
                   <p className="text-base sm:text-lg lg:text-xl">
@@ -201,14 +215,16 @@ export default function About() {
               {/* Spotify */}
               <div className="w-full max-w-lg flex-shrink-0 lg:col-start-1 lg:row-start-2 lg:max-w-none">
                 {spotifyLoading ? (
-                  <p>Cargando playlists...</p>
-                ) : spotifyError ? (
-                  <p>Error: {spotifyError}</p>
+                  <p className="text-center">Cargando playlists…</p>
                 ) : playlists.length > 0 ? (
                   <div className="w-full">
                     <SpotifyPlaylists playlists={playlists} />
                   </div>
-                ) : null}
+                ) : (
+                  // Si Spotify falla, la sección simplemente no se muestra en
+                  // vez de escupir el mensaje de error crudo en la página.
+                  null
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-8">
@@ -393,7 +409,9 @@ export default function About() {
           }
         }
 
-        .rainbow-text {
+        /* Renombrado desde .rainbow-text: colisionaba con la regla de
+           globals.css, cuya animación de color anulaba el degradado. */
+        .gradient-heading {
           background: linear-gradient(
             to right,
             #2C3E50,    /* Azul oscuro */

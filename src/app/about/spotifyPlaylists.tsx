@@ -6,7 +6,7 @@ interface SpotifyPlaylist {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  imageUrl: string | null;
   trackCount: number;
   firstTrack: string;
   firstTrackArtist: string;
@@ -35,8 +35,7 @@ const SpotifyPlaylists: React.FC<SpotifyPlaylistsProps> = ({ playlists }) => {
               src={`https://open.spotify.com/embed/playlist/${mainPlaylistId}?utm_source=generator&theme=0`}
               width="100%"
               height="100%"
-              style={{ minHeight: '100%' }}
-              frameBorder="0"
+              style={{ minHeight: '100%', border: 0 }}
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
             />
@@ -51,16 +50,17 @@ const SpotifyPlaylists: React.FC<SpotifyPlaylistsProps> = ({ playlists }) => {
               rel="noopener noreferrer"
               className="mb-8 flex w-full flex-col items-center rounded-md bg-white/20 p-4 transition-all duration-300 hover:bg-white/30"
             >
-              <div className="relative mb-4 w-full max-w-xs aspect-square">
-                <Image
-                  src={playlist.imageUrl || '/placeholder-playlist.png'}
-                  alt={`Portada de ${playlist.name}`}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg shadow-xl"
-                  priority
-                />
-              </div>
+              {playlist.imageUrl && (
+                <div className="relative mb-4 aspect-square w-full max-w-xs">
+                  <Image
+                    src={playlist.imageUrl}
+                    alt={`Portada de ${playlist.name}`}
+                    fill
+                    sizes="(max-width: 1024px) 80vw, 320px"
+                    className="rounded-lg object-cover shadow-xl"
+                  />
+                </div>
+              )}
               <div className="flex w-full flex-col items-center text-center">
                 <h4 className="mb-2 text-xl font-bold text-white">
                   {playlist.name}

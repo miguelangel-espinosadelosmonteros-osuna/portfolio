@@ -2,12 +2,9 @@ import type { Config } from 'tailwindcss';
 
 const config = {
   darkMode: ['class'],
-  content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}'
-  ],
+  // Todo el código vive bajo src/; las rutas ./pages, ./components y ./app
+  // no existen en este proyecto.
+  content: ['./src/**/*.{ts,tsx}'],
   prefix: '',
   theme: {
     fontFamily: {
