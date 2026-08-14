@@ -71,9 +71,16 @@ async function requestAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    // El cuerpo puede traer el client_secret en algunos errores: no lo propagamos.
+    // Spotify devuelve un código estable (`invalid_client` si fallan
+    // id/secret, `invalid_grant` si el refresh token está revocado). No
+    // contiene credenciales, así que sirve para diagnosticar desde los logs.
+    const code = await response
+      .json()
+      .then((b: any) => b?.error ?? 'desconocido')
+      .catch(() => 'ilegible');
+
     throw new SpotifyApiError(
-      'No se pudo renovar el access token de Spotify',
+      `No se pudo renovar el access token de Spotify (${response.status} ${code})`,
       response.status === 400 || response.status === 401 ? 401 : 502
     );
   }
