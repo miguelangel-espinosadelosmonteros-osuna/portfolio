@@ -12,6 +12,11 @@ import { clsx } from 'clsx';
 import { usePathname } from 'next/navigation';
 import PreLoader from '@/components/animations/preLoader';
 
+// template.tsx se remonta en cada navegación, así que el preloader salía en
+// todas. Este flag vive en el módulo: persiste entre navegaciones de cliente
+// y se reinicia con una recarga real, que es justo el comportamiento buscado.
+let yaMostrado = false;
+
 export default function RootTemplate({ children }: PropsWithChildren) {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -21,7 +26,7 @@ export default function RootTemplate({ children }: PropsWithChildren) {
 
   const input = isMobile() ? 0.95 : 1.0;
   const height = useTransform(scrollYProgress, [0, input], [100, 0]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!yaMostrado);
   const pathname = usePathname().split('/').pop();
 
   let bgColour = 'bg-background';
@@ -36,10 +41,14 @@ export default function RootTemplate({ children }: PropsWithChildren) {
   }
 
   useEffect(() => {
+    document.body.style.cursor = 'default';
+    window.scrollTo(0, 0);
+
+    if (yaMostrado) return;
+
     const timer = setTimeout(() => {
+      yaMostrado = true;
       setIsLoading(false);
-      document.body.style.cursor = 'default';
-      window.scrollTo(0, 0);
     }, 800);
 
     return () => clearTimeout(timer);

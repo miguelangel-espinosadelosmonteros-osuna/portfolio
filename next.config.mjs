@@ -11,7 +11,10 @@ const nextConfig = {
       { protocol: 'https', hostname: 'image-cdn-fa.spotifycdn.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
-    unoptimized: true,
+    // `unoptimized: true` servía los PNG originales tal cual: hay archivos de
+    // más de 4 MB en /public. Con la optimización activa, Vercel los
+    // reescala y los sirve en AVIF/WebP según el viewport.
+    formats: ['image/avif', 'image/webp'],
   },
   typescript: {
     ignoreBuildErrors: false,

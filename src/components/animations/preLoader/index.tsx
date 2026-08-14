@@ -6,12 +6,14 @@ import { opacity, slideUp } from '@/components/animations/preLoader/anim';
 import { clsx } from 'clsx';
 import { usePathname } from 'next/navigation';
 
+// Clases completas: `bg-${colour}` es interpolado y Tailwind lo purga al
+// compilar, así que el punto nunca llegaba a tener color.
 const words = [
-  { text: 'Hola', colour: 'primary' },
-  { text: 'Hello', colour: 'secondary' },
-  { text: 'Salut', colour: 'accent' },
-  { text: 'Bonjour', colour: 'destructive' },
-  { text: 'Ciao', colour: 'bg-purple-500' }
+  { text: 'Hola', dot: 'bg-primary', label: 'text-primary' },
+  { text: 'Hello', dot: 'bg-secondary', label: 'text-secondary' },
+  { text: 'Salut', dot: 'bg-accent', label: 'text-accent' },
+  { text: 'Bonjour', dot: 'bg-destructive', label: 'text-destructive' },
+  { text: 'Ciao', dot: 'bg-purple-500', label: 'text-purple-500' }
 ];
 
 export default function PreLoader() {
@@ -76,17 +78,17 @@ export default function PreLoader() {
             initial="initial"
             animate="enter"
             className={clsx(
-              'absolute flex items-center justify-center text-4xl text-white',
-              `text-${words[index].colour}`
+              'absolute flex items-center justify-center text-4xl',
+              words[index].label
             )}
           >
+            {/* `size-3` requiere Tailwind 3.4; el proyecto usa 3.3.3. */}
             <span
               className={clsx(
-                'size-3 mr-3 block rounded-full',
-                `bg-${words[index].colour}`
+                'mr-3 block h-3 w-3 rounded-full',
+                words[index].dot
               )}
             ></span>
-            hii
             {pathname === '' ? words[index].text : pathname}
           </motion.p>
           <svg className="absolute top-0 h-[calc(100%+300px)] w-full fill-[#141516]">
