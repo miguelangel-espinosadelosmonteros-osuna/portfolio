@@ -21,7 +21,7 @@ const contact = [
     },
     {
         icon: <FaLinkedin />,
-        link: 'https://www.linkedin.com/in/mikespinosa/',
+        link: 'https://www.linkedin.com/in/miguel-angel-espinosa-de-los-monteros-283bb930b/',
         ariaLabel: 'LinkedIn de Mike Espinosa'
     },
     {

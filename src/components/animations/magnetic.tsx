@@ -21,10 +21,24 @@ export default function Magnetic({ children }: PropsWithChildren<any>) {
       ease: 'elastic.out(1, 0.3)'
     });
 
-    const handleMouseMove = (e: MouseEvent) => {
+    // El centro se mide una vez al entrar, no en cada mousemove.
+    // getBoundingClientRect fuerza un reflow sincrónico, y además devolvía el
+    // rect YA desplazado por GSAP, así que el desplazamiento se retroalimentaba.
+    let centerX = 0;
+    let centerY = 0;
+
+    const measure = () => {
       const { height, width, left, top } = element.getBoundingClientRect();
-      xTo((e.clientX - (left + width / 2)) * 0.4);
-      yTo((e.clientY - (top + height / 2)) * 0.4);
+      const current = gsap.getProperty(element) as (p: string) => number;
+      centerX = left + width / 2 - (current('x') || 0);
+      centerY = top + height / 2 - (current('y') || 0);
+    };
+
+    const handleMouseEnter = () => measure();
+
+    const handleMouseMove = (e: MouseEvent) => {
+      xTo((e.clientX - centerX) * 0.4);
+      yTo((e.clientY - centerY) * 0.4);
     };
 
     const handleMouseLeave = () => {
@@ -32,10 +46,12 @@ export default function Magnetic({ children }: PropsWithChildren<any>) {
       yTo(0);
     };
 
+    element.addEventListener('mouseenter', handleMouseEnter);
     element.addEventListener('mousemove', handleMouseMove);
     element.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
+      element.removeEventListener('mouseenter', handleMouseEnter);
       element.removeEventListener('mousemove', handleMouseMove);
       element.removeEventListener('mouseleave', handleMouseLeave);
       gsap.killTweensOf(element);

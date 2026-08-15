@@ -1,16 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
+const MAX_DISTANCE = 150;
+const MAX_DISTANCE_SQ = MAX_DISTANCE * MAX_DISTANCE;
+
 export default function Particles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const updateCanvasSize = () => {
       const container = canvas.parentElement;
@@ -29,8 +32,11 @@ export default function Particles() {
       dy: number;
     }> = [];
 
-    // Crear más partículas basado en el tamaño del canvas
-    const particleCount = Math.min(100, Math.floor((canvas.width * canvas.height) / 15000));
+    const particleCount = Math.min(
+      100,
+      Math.floor((canvas.width * canvas.height) / 15000)
+    );
+
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -41,55 +47,67 @@ export default function Particles() {
       });
     }
 
-    function animate() {
-      if (!ctx || !canvas) return;
+    let frame = 0;
+
+    const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach(particle => {
-        // Dibujar partícula
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fill();
 
-        // Mover partícula
-        particle.x += particle.dx;
-        particle.y += particle.dy;
+        p.x += p.dx;
+        p.y += p.dy;
 
-        // Envolver partículas en los bordes (en lugar de rebotar)
-        if (particle.x < 0) particle.x = canvas.width;
-        if (particle.x > canvas.width) particle.x = 0;
-        if (particle.y < 0) particle.y = canvas.height;
-        if (particle.y > canvas.height) particle.y = 0;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
 
-        // Conectar partículas cercanas
-        particles.forEach(otherParticle => {
-          const dx = particle.x - otherParticle.x;
-          const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+        // Solo j > i: antes cada par se recorría y se dibujaba dos veces.
+        for (let j = i + 1; j < particles.length; j++) {
+          const other = particles[j];
+          const dx = p.x - other.x;
+          const dy = p.y - other.y;
+          const distSq = dx * dx + dy * dy;
 
-          if (distance < 150) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 - distance/500})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.stroke();
-          }
-        });
-      });
+          // Se descarta con la distancia al cuadrado; la raíz solo se calcula
+          // para los pares que realmente se dibujan.
+          if (distSq >= MAX_DISTANCE_SQ) continue;
 
-      requestAnimationFrame(animate);
-    }
+          const distance = Math.sqrt(distSq);
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 - distance / 500})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(other.x, other.y);
+          ctx.stroke();
+        }
+      }
 
-    animate();
-
-    const handleResize = () => {
-      updateCanvasSize();
+      frame = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    frame = requestAnimationFrame(animate);
+
+    // El bucle seguía vivo tras desmontar: no se guardaba el id del frame.
+    const handleVisibility = () => {
+      cancelAnimationFrame(frame);
+      if (!document.hidden) frame = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('resize', updateCanvasSize);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', updateCanvasSize);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   return (
@@ -99,4 +117,4 @@ export default function Particles() {
       style={{ mixBlendMode: 'screen' }}
     />
   );
-} 
+}
