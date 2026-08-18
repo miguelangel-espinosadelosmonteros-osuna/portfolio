@@ -1,15 +1,22 @@
 'use client';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { clsx } from 'clsx';
 
 interface HeroSectionProps {
   description: string;
   title: string;
   isImage: boolean;
-  media: string;
+  media: string | StaticImageData;
   bgColour?: string;
+  /**
+   * Portada y enlace externo para vídeos que no se pueden embeber (el dueño
+   * del vídeo tiene el embebido desactivado y player.vimeo.com responde 401).
+   * Se muestra la portada a pantalla completa y se enlaza al vídeo original.
+   */
+  posterSrc?: string | StaticImageData;
+  videoHref?: string;
 }
 
 export default function ProjectHero({
@@ -17,7 +24,9 @@ export default function ProjectHero({
   title,
   isImage,
   media,
-  bgColour
+  bgColour,
+  posterSrc,
+  videoHref
 }: HeroSectionProps) {
   const [isMuted, setIsMuted] = useState(true);
 
@@ -25,11 +34,14 @@ export default function ProjectHero({
     setIsMuted(!isMuted);
   };
 
+  const usaPortada = !isImage && !!videoHref && !!posterSrc;
+
   const getVideoSrc = () => {
-    if (media.includes('vimeo')) {
-      return `${media}?autoplay=1&muted=1&loop=1&color=E73C39&title=0&portrait=0&background=1#t=1m33s`;
+    const src = String(media);
+    if (src.includes('vimeo')) {
+      return `${src}?autoplay=1&muted=1&loop=1&color=E73C39&title=0&portrait=0&background=1#t=1m33s`;
     }
-    return `${media}?autoplay=1&mute=${isMuted ? '1' : '0'}&controls=0&loop=1&playlist=${media.split('/').pop()}`;
+    return `${src}?autoplay=1&mute=${isMuted ? '1' : '0'}&controls=0&loop=1&playlist=${src.split('/').pop()}`;
   };
 
   return (
@@ -53,6 +65,15 @@ export default function ProjectHero({
             alt="project image"
           />
         </div>
+      ) : usaPortada ? (
+        <Image
+          src={posterSrc!}
+          alt={title}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
       ) : (
         <iframe
           src={getVideoSrc()}
@@ -66,10 +87,23 @@ export default function ProjectHero({
       {!isImage && (
         <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-foreground"></div>
       )}
-      {!isImage && (
-        <Button
+      {usaPortada && (
+        <a
+          href={videoHref}
+          target="_blank"
+          rel="noopener noreferrer"
           // En móvil `bottom-32` caía justo encima del título; se sube al
           // hueco libre bajo la cabecera y solo baja a partir de sm.
+          className="absolute right-4 top-20 z-10 inline-flex items-center gap-2 rounded bg-white/90 px-3 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-white sm:bottom-16 sm:right-6 sm:top-auto"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          Ver vídeo
+        </a>
+      )}
+      {!isImage && !usaPortada && (
+        <Button
           className="absolute right-4 top-20 z-10 h-8 rounded px-3 sm:bottom-16 sm:right-6 sm:top-auto"
           onClick={toggleMute}
         >

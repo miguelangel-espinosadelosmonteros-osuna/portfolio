@@ -27,9 +27,14 @@ export default function APSProject() {
 
   return (
     <div className="bg-foreground">
+      {/* El vídeo institucional de Soñar Despierto tiene el embebido
+          desactivado (player.vimeo.com devuelve 401), así que se muestra una
+          portada propia y se enlaza al vídeo original, que sí es público. */}
       <ProjectHero
         description={myRole}
         media={'https://player.vimeo.com/video/307596948'}
+        posterSrc={Img1}
+        videoHref={'https://vimeo.com/307596948'}
         isImage={false}
         title={'Amigos Para Siempre'}
       />
