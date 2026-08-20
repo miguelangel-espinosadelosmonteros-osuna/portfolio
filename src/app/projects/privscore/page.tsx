@@ -48,7 +48,7 @@ export default function PrivScoreProject() {
         media={Cover}
         isImage={false}
         posterSrc={Cover}
-        bgColour="bg-[#0d1117]"
+        bgColour="bg-[#e8ebed]"
       />
 
       <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8 sm:py-24">

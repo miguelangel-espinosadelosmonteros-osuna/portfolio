@@ -33,6 +33,24 @@ const projects = [
     color: '#b6c1e1'
   },
   {
+    title: 'ABA Cargo',
+    description:
+      'Sitio corporativo de logística internacional México–EE.UU.–Canadá, con cotizador de envíos y un asistente conversacional conectado a una API de LLM.',
+    src: 'AbaCargo/AbaCargo1.png',
+    href: 'https://aba-cargo.vercel.app',
+    tag: 'Logística Internacional',
+    color: '#1f6fd0'
+  },
+  {
+    title: 'Herbolario',
+    description:
+      'Sistema de inventario a medida para un herbolario de Madrid: control de stock, alta de productos y reportes, con escáner de producto asistido por IA.',
+    src: 'Herbolario/Herbolario1.png',
+    href: 'https://herbolario-ecommerce.vercel.app',
+    tag: 'Inventario y Punto de Venta',
+    color: '#0d3730'
+  },
+  {
     title: 'PrivScore',
     description:
       'Extensión de Chrome y Edge que audita la privacidad de un sitio y la resume en una nota de la A a la E.',
@@ -46,7 +64,6 @@ const projects = [
     description:
       'Reusable packaging made of highly recyclable materials for baby bathing products.',
     src: 'GlucoMind/GlucoMind1.png',
-    href: 'https://github.com/miguelangel-espinosadelosmonteros-osuna/diabetes-app',
     tag: 'App para Diabetes',
     color: '#1a6ad8',
     wip: true
@@ -127,6 +144,23 @@ export default function ProjectsHome() {
         <div className="m-0">
           <div className="m-0 overflow-hidden">
             {projects.map((project, index) => {
+              const tarjeta = (
+                <ProjectLink
+                  index={index}
+                  title={project.title}
+                  tag={project.tag}
+                  wip={project.wip}
+                  special={project.special}
+                  color={project.color}
+                />
+              );
+
+              // Sin href la tarjeta no se envuelve: antes `href.startsWith`
+              // lanzaba si la propiedad no estaba definida.
+              if (!project.href) {
+                return <div key={index}>{tarjeta}</div>;
+              }
+
               const isExternal = project.href.startsWith('http');
               if (isExternal) {
                 return (
@@ -136,27 +170,13 @@ export default function ProjectsHome() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <ProjectLink
-                      index={index}
-                      title={project.title}
-                      tag={project.tag}
-                      wip={project.wip}
-                      special={project.special}
-                      color={project.color}
-                    />
+                    {tarjeta}
                   </a>
                 );
               }
               return (
                 <Link href={project.href} key={index}>
-                  <ProjectLink
-                    index={index}
-                    title={project.title}
-                    tag={project.tag}
-                    wip={project.wip}
-                    special={project.special}
-                    color={project.color}
-                  />
+                  {tarjeta}
                 </Link>
               );
             })}

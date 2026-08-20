@@ -26,7 +26,7 @@ interface ModalProps {
   projects: {
     src: string;
     color: string;
-    href: string;
+    href?: string;
     special?: string;
   }[];
 }
@@ -86,8 +86,9 @@ export default function Modal({ projects }: ModalProps) {
     }
   }, []);
 
-  return (
-    <Link href={projects[index].href}>
+  const href = projects[index]?.href;
+
+  const contenido = (
       <motion.div
         variants={scaleAnimation}
         ref={modalContainer}
@@ -132,6 +133,8 @@ export default function Modal({ projects }: ModalProps) {
           })}
         </div>
       </motion.div>
-    </Link>
   );
+
+  // Sin href el modal no se envuelve en <Link>: GlucoMind ya no enlaza a nada.
+  return href ? <Link href={href}>{contenido}</Link> : contenido;
 }
