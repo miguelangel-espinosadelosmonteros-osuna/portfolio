@@ -34,7 +34,9 @@ export default function ProjectHero({
     setIsMuted(!isMuted);
   };
 
-  const usaPortada = !isImage && !!videoHref && !!posterSrc;
+  // La portada se usa siempre que haya posterSrc; el enlace "Ver vídeo" solo
+  // aparece si además hay videoHref, para no prometer un vídeo inexistente.
+  const usaPortada = !isImage && !!posterSrc;
 
   const getVideoSrc = () => {
     const src = String(media);
@@ -87,7 +89,7 @@ export default function ProjectHero({
       {!isImage && (
         <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-foreground"></div>
       )}
-      {usaPortada && (
+      {usaPortada && videoHref && (
         <a
           href={videoHref}
           target="_blank"

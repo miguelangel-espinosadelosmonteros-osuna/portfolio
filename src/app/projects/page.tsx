@@ -33,6 +33,15 @@ const projects = [
     color: '#b6c1e1'
   },
   {
+    title: 'PrivScore',
+    description:
+      'Extensión de Chrome y Edge que audita la privacidad de un sitio y la resume en una nota de la A a la E.',
+    src: 'PrivScore/PrivScore1.png',
+    href: '/projects/privscore',
+    tag: 'Privacidad e IA',
+    color: '#0d1117'
+  },
+  {
     title: 'GlucoMind',
     description:
       'Reusable packaging made of highly recyclable materials for baby bathing products.',

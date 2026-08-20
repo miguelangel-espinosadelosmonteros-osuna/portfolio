@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer';
 import { mkdirSync } from 'node:fs';
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3000';
-const ROUTES = ["/", "/about", "/projects", "/contact", "/projects/aps"];
+const ROUTES = ["/", "/about", "/projects", "/contact", "/projects/aps", "/projects/privscore"];
 const VIEWPORTS = [
   { name: 'movil', width: 375, height: 812 },
   { name: 'movil-xs', width: 320, height: 720 },
