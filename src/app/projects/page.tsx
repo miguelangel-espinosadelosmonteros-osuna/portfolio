@@ -37,7 +37,6 @@ const projects = [
     description:
       'Sitio corporativo de logística internacional México–EE.UU.–Canadá, con cotizador de envíos y un asistente conversacional conectado a una API de LLM.',
     src: 'AbaCargo/AbaCargo1.png',
-    href: 'https://aba-cargo.vercel.app',
     tag: 'Logística Internacional',
     color: '#1f6fd0'
   },
