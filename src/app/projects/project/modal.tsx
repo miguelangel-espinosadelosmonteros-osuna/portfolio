@@ -35,55 +35,53 @@ export default function Modal({ projects }: ModalProps) {
   const { modal } = useContext(ModalContext);
   const { active, index } = modal;
   const modalContainer = useRef(null);
-  const cursor = useRef(null);
-  const cursorLabel = useRef(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      //Move Container
-      let xMoveContainer = gsap.quickTo(modalContainer.current, 'left', {
-        duration: 0.8,
-        ease: 'power3'
-      });
+    const el = modalContainer.current as HTMLElement | null;
+    if (!el) return;
 
-      let yMoveContainer = gsap.quickTo(modalContainer.current, 'top', {
-        duration: 0.8,
-        ease: 'power3'
-      });
+    const xTo = gsap.quickTo(el, 'left', { duration: 0.8, ease: 'power3' });
+    const yTo = gsap.quickTo(el, 'top', { duration: 0.8, ease: 'power3' });
 
-      //Move cursor
-      let xMoveCursor = gsap.quickTo(cursor.current, 'left', {
-        duration: 0.5,
-        ease: 'power3'
-      });
+    const MARGEN = 12;
 
-      let yMoveCursor = gsap.quickTo(cursor.current, 'top', {
-        duration: 0.5,
-        ease: 'power3'
-      });
+    const acotar = (v: number, min: number, max: number) =>
+      min > max ? (min + max) / 2 : Math.min(Math.max(v, min), max);
 
-      //Move cursor label
-      let xMoveCursorLabel = gsap.quickTo(cursorLabel.current, 'left', {
-        duration: 0.45,
-        ease: 'power3'
-      });
+    const onMouseMove = (e: MouseEvent) => {
+      // `left`/`top` son relativos al offsetParent, pero se les pasaba pageX/
+      // pageY (coordenadas de documento). Como el contenedor arranca 144px más
+      // abajo por el mt-36 del layout, la preview iba siempre 144px por debajo
+      // del cursor y se salía de la pantalla en los proyectos de abajo.
+      const padre = el.offsetParent as HTMLElement | null;
+      const r = padre?.getBoundingClientRect();
+      const padreX = (r?.left ?? 0) + window.scrollX;
+      const padreY = (r?.top ?? 0) + window.scrollY;
 
-      let yMoveCursorLabel = gsap.quickTo(cursorLabel.current, 'top', {
-        duration: 0.45,
-        ease: 'power3'
-      });
+      const mitadAncho = el.offsetWidth / 2;
+      const mitadAlto = el.offsetHeight / 2;
 
-      window.addEventListener('mousemove', (e) => {
-        const { pageX, pageY } = e;
+      // Se centra en el cursor con translate(-50%,-50%): su centro debe
+      // mantenerse a media caja de cada borde visible.
+      const x = acotar(
+        e.pageX,
+        window.scrollX + mitadAncho + MARGEN,
+        window.scrollX + window.innerWidth - mitadAncho - MARGEN
+      );
+      const y = acotar(
+        e.pageY,
+        window.scrollY + mitadAlto + MARGEN,
+        window.scrollY + window.innerHeight - mitadAlto - MARGEN
+      );
 
-        xMoveContainer(pageX);
-        yMoveContainer(pageY);
-        xMoveCursor(pageX);
-        yMoveCursor(pageY);
-        xMoveCursorLabel(pageX);
-        yMoveCursorLabel(pageY);
-      });
-    }
+      xTo(x - padreX);
+      yTo(y - padreY);
+    };
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+    // El listener sobrevivía a la navegación: nunca se eliminaba.
+    return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
   const href = projects[index]?.href;
