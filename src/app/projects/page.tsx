@@ -45,7 +45,6 @@ const projects = [
     description:
       'Sistema de inventario a medida para un herbolario de Madrid: control de stock, alta de productos y reportes, con escáner de producto asistido por IA.',
     src: 'Herbolario/Herbolario1.png',
-    href: 'https://herbolario-ecommerce.vercel.app',
     tag: 'Inventario y Punto de Venta',
     color: '#0d3730'
   },
