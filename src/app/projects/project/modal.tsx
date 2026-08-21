@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useContext, useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import Link from 'next/link';
 import { ModalContext } from '@/app/projects/modalContext';
 import { Plus } from 'lucide-react';
 
@@ -84,9 +83,12 @@ export default function Modal({ projects }: ModalProps) {
     return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
-  const href = projects[index]?.href;
-
-  const contenido = (
+  // Sin envoltorio condicional: alternar entre <Link> y <div> según el
+  // proyecto hovereado remontaba este nodo, así perdía el left/top que le fija
+  // GSAP y los quickTo se quedaban animando el nodo antiguo ya desechado.
+  // El <Link> además era inocuo: pointer-events-none deja pasar los clics a la
+  // fila del proyecto, que ya es un enlace.
+  return (
       <motion.div
         variants={scaleAnimation}
         ref={modalContainer}
@@ -132,7 +134,4 @@ export default function Modal({ projects }: ModalProps) {
         </div>
       </motion.div>
   );
-
-  // Sin href el modal no se envuelve en <Link>: GlucoMind ya no enlaza a nada.
-  return href ? <Link href={href}>{contenido}</Link> : contenido;
 }
